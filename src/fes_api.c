@@ -22,11 +22,11 @@
 
 // Path to the configuration file and data used to test the library
 // Change these settings to your liking.
-#ifndef INI
-#define INI "../data/fes2022b/fes2022.ini"
+#ifndef DEFAULT_INI
+#define DEFAULT_INI "../data/fes2022b/fes2022.ini"
 #endif
-#ifndef FES_DATA
-#define FES_DATA "../data/fes2022b"
+#ifndef DEFAULT_FES_DATA
+#define DEFAULT_FES_DATA "../data/fes2022b"
 #endif
 
 // Function to convert epoch time to Julian days
@@ -77,17 +77,28 @@ int main(int argc, char *argv[])
   FES short_tide;
   FES radial_tide = NULL;
 
-  setenv("FES_DATA", FES_DATA, 1);
+  // Read INI and FES_DATA from environment variables
+  const char *ini_path = getenv("INI");
+  if (!ini_path) {
+    ini_path = DEFAULT_INI;
+  }
+
+  const char *fes_data_path = getenv("FES_DATA");
+  if (!fes_data_path) {
+    fes_data_path = DEFAULT_FES_DATA;
+  }
+
+  setenv("FES_DATA", fes_data_path, 1);
 
   // Creating the FES handler to calculate the ocean tide
-  if (fes_new(&short_tide, FES_TIDE, FES_IO, INI))
+  if (fes_new(&short_tide, FES_TIDE, FES_IO, ini_path))
   {
     printf("fes error : %s\n", fes_error(short_tide));
     goto error;
   }
 
   // Creating the FES handler to calculate the loading tide
-  if (fes_new(&radial_tide, FES_RADIAL, FES_IO, INI))
+  if (fes_new(&radial_tide, FES_RADIAL, FES_IO, ini_path))
   {
     printf("fes error : %s\n", fes_error(radial_tide));
     goto error;
